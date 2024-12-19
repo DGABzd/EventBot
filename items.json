@@ -1,0 +1,58 @@
+{
+  "Común": [
+    "Gorro navideño",
+    "Bastón de caramelo",
+    "Calcetín navideño",
+    "Bola de nieve",
+    "Campanita dorada",
+    "Copo de nieve brillante"
+  ],
+  "Poco Común": [
+    "Adorno de reno",
+    "Velas navideñas",
+    "Caramelos surtidos",
+    "Caja de galletas",
+    "Media navideña decorada",
+    "Bufanda de invierno"
+  ],
+  "Raro": [
+    "Muñeco de nieve",
+    "Caja de chocolates",
+    "Árbol navideño decorado",
+    "Sombrero del duende",
+    "Chaleco de Santa",
+    "Trineo pequeño"
+  ],
+  "Épico": [
+    "Trineo volador",
+    "Reno mágico",
+    "Esfera de cristal navideña",
+    "Nariz de Rodolfo",
+    "Bastón de mando de Santa",
+    "Funda de regalo encantada"
+  ],
+  "Legendario": [
+    "Espíritu de la Navidad",
+    "Estrella mágica",
+    "Regalo dorado",
+    "Peluche de Peter",
+    "Corona de Navidad dorada",
+    "Caja mágica de deseos"
+  ],
+  "Mítico": [
+    "Anillo de la aurora boreal",
+    "Cetro de la Navidad eterna",
+    "Escarcha celestial",
+    "Campana dorada de invierno",
+    "Amuleto de los Reyes Magos",
+    "Árbol de cristal mágico"
+  ],
+  "Exótico": [
+    "Esfera del destino navideño",
+    "Llave del trineo secreto",
+    "Caja fuerte de regalos prohibidos",
+    "Copos de nieve vivos",
+    "Espíritu de Santa secreto",
+    "Reno mítico encantado"
+  ]
+}
