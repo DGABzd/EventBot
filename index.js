@@ -1,4 +1,4 @@
-const { Client, GatewayIntentBits, EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle } = require('discord.js');
+const { Client, GatewayIntentBits, EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle, Collection } = require('discord.js');
 const { token } = require('./config/config.json');
 const fs = require('fs');
 
@@ -7,6 +7,9 @@ const serverDataFile = './data/serverData.json';
 const itemsFile = './data/items.json';
 const imagesFile = './data/images.json';
 const userDataFile = './data/userData.json';
+
+// Funciones para manejo de JSON
+const { loadJSON, saveJSON } = require('./utils/jsonUtils');
 
 // Datos en memoria
 const lastActivity = {};
@@ -18,16 +21,6 @@ const images = loadJSON(imagesFile);
 
 // Crear cliente
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
-
-// Funciones para manejo de JSON
-function loadJSON(file) {
-  if (!fs.existsSync(file)) return {};
-  return JSON.parse(fs.readFileSync(file, 'utf-8'));
-}
-
-function saveJSON(file, data) {
-  fs.writeFileSync(file, JSON.stringify(data, null, 2));
-}
 
 // Función para iniciar un intervalo
 function startInterval(guildId, channelId, intervalMinutes) {
@@ -187,6 +180,35 @@ client.on('messageCreate', (message) => {
 });
 
 
+// Crear colección de comandos
+client.commands = new Collection();
+
+// Cargar comandos
+const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+for (const file of commandFiles) {
+  const command = require(`./commands/${file}`);
+  client.commands.set(command.name, command);
+}
+
+// Manejo de comandos
+client.on('messageCreate', (message) => {
+  if (!message.content.startsWith('!') || message.author.bot) return;
+
+  const args = message.content.slice(1).trim().split(/ +/);
+  const commandName = args.shift().toLowerCase();
+
+  const command = client.commands.get(commandName);
+  if (!command) return;
+
+  try {
+    command.execute(message, args);
+  } catch (error) {
+    console.error(error);
+    message.reply('Hubo un error ejecutando este comando.');
+  }
+});
+
+
 // Comando para configurar el intervalo
 client.on('messageCreate', (message) => {
   if (!message.content.startsWith('!setinterval') || !message.member.permissions.has('ADMINISTRATOR')) return;
@@ -208,72 +230,6 @@ client.on('messageCreate', (message) => {
   }
 
   message.reply(`Intervalo configurado a ${interval} minutos para este servidor.`);
-});
-
-// Comando para configurar el canal
-client.on('messageCreate', (message) => {
-  if (!message.content.startsWith('!setchannel') || !message.member.permissions.has('ADMINISTRATOR')) return;
-
-  const guildId = message.guild.id;
-  const channelId = message.channel.id;
-
-  if (!serverData[guildId]) serverData[guildId] = {};
-  serverData[guildId].channelId = channelId;
-  saveJSON(serverDataFile, serverData);
-
-  if (serverData[guildId].interval) {
-    startInterval(guildId, channelId, serverData[guildId].interval);
-  }
-
-  message.reply(`Canal configurado para enviar las entidades.`);
-});
-
-// Comando para ver el top de regalos
-client.on('messageCreate', (message) => {
-  if (!message.content.startsWith('!top')) return;
-
-  const guildId = message.guild.id;
-  if (!userData[guildId]) return message.reply('No hay datos de regalos en este servidor.');
-
-  const sortedUsers = Object.entries(userData[guildId])
-    .map(([id, data]) => ({ id, gifts: data.gifts }))
-    .sort((a, b) => b.gifts - a.gifts)
-    .slice(0, 10);
-
-  if (sortedUsers.length === 0) {
-    return message.reply('No hay usuarios con regalos registrados.');
-  }
-
-  const topEmbed = new EmbedBuilder()
-    .setTitle('<:gifts:1318992821927149639> Top de Regalos <:gifts:1318992821927149639>')
-    .setDescription(sortedUsers.map((u, i) => `**${i + 1}.** <@${u.id}>: ${u.gifts} regalos`).join('\n'))
-    .setThumbnail('https://cdn.discordapp.com/attachments/1317101011843944513/1317188510431842426/6272910.png')
-    .setColor('#FFD700');
-  message.reply({ embeds: [topEmbed] });
-});
-
-// Comando para ver inventario
-client.on('messageCreate', (message) => {
-  if (!message.content.startsWith('!inventory')) return;
-
-  const guildId = message.guild.id;
-  const userId = message.author.id;
-  const userInventory = userData[guildId]?.[userId]?.inventory || [];
-
-  if (userInventory.length === 0) {
-    return message.reply('No tienes regalos en tu inventario.');
-  }
-
-  const inventoryEmbed = new EmbedBuilder()
-    .setTitle('🎄 Tu inventario 🎄')
-    .setDescription(
-      userInventory
-        .map(item => `**${item.item}** (${item.rarity}) x${item.count}`)
-        .join('\n')
-    )
-    .setColor('#00FF00');
-
-  message.reply({ embeds: [inventoryEmbed] });
 });
 
 // Iniciar el cliente
