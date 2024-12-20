@@ -1,12 +1,12 @@
 const { Client, GatewayIntentBits, EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle } = require('discord.js');
-const { token } = require('./config.json');
+const { token } = require('./config/config.json');
 const fs = require('fs');
 
 // Archivos de datos
-const serverDataFile = './serverData.json';
-const itemsFile = './items.json';
-const imagesFile = './images.json';
-const userDataFile = './userData.json';
+const serverDataFile = './data/serverData.json';
+const itemsFile = './data/items.json';
+const imagesFile = './data/images.json';
+const userDataFile = './data/userData.json';
 
 // Datos en memoria
 const lastActivity = {};
@@ -15,10 +15,6 @@ const serverData = loadJSON(serverDataFile);
 const userData = loadJSON(userDataFile);
 const items = loadJSON(itemsFile);
 const images = loadJSON(imagesFile);
-
-
-// ID del administrador con permisos para modificar regalos
-const adminId = '1235766090005614705';
 
 // Crear cliente
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
@@ -46,7 +42,7 @@ function startInterval(guildId, channelId, intervalMinutes) {
 // Función para generar una rareza aleatoria
 function getRandomRarity() {
   const rarities = ['Común', 'Poco Común', 'Raro', 'Épico', 'Legendario', 'Mítico', 'Exótico'];
-  const weights = [50, 25, 15, 5, 3, 2, 1]; // Exótico es el más raro, y Mítico es bastante difícil.
+  const weights = [50, 25, 15, 5, 3, 2, 1];
 
   const totalWeight = weights.reduce((a, b) => a + b, 0);
   const random = Math.random() * totalWeight;
@@ -169,7 +165,6 @@ client.on('interactionCreate', async (interaction) => {
 
     const updatedEmbed = EmbedBuilder.from(message.embeds[0])
       .setDescription('La entidad ha entregado un regalo y se ha ido.');
-
     message.edit({ embeds: [updatedEmbed], components: [] });
   } else {
     const failImageArray = images.scared || [];
@@ -254,7 +249,6 @@ client.on('messageCreate', (message) => {
     .setDescription(sortedUsers.map((u, i) => `**${i + 1}.** <@${u.id}>: ${u.gifts} regalos`).join('\n'))
     .setThumbnail('https://cdn.discordapp.com/attachments/1317101011843944513/1317188510431842426/6272910.png')
     .setColor('#FFD700');
-
   message.reply({ embeds: [topEmbed] });
 });
 
@@ -280,28 +274,6 @@ client.on('messageCreate', (message) => {
     .setColor('#00FF00');
 
   message.reply({ embeds: [inventoryEmbed] });
-});
-
-// Comando para añadir regalos (solo admin)
-client.on('messageCreate', (message) => {
-  if (!message.content.startsWith('!addgifts') || message.author.id !== adminId) return;
-
-  const args = message.content.split(' ');
-  const userId = args[1]?.replace(/[<@!>]/g, ''); // Quitar formato de mención
-  const amount = parseInt(args[2]);
-
-  if (!userId || isNaN(amount) || amount < 1) {
-    return message.reply('Formato incorrecto. Usa: `!addgifts @usuario cantidad`.');
-  }
-
-  const guildId = message.guild.id;
-  if (!userData[guildId]) userData[guildId] = {};
-  if (!userData[guildId][userId]) userData[guildId][userId] = { gifts: 0, inventory: [] };
-
-  userData[guildId][userId].gifts += amount;
-  saveJSON(userDataFile, userData);
-
-  message.reply(`Se añadieron ${amount} regalos a <@${userId}>.`);
 });
 
 // Iniciar el cliente

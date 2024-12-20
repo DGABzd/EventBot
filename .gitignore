@@ -1,2 +1,6 @@
 node_modules/
-config.js
+config/
+package-lock.json
+package.json
+data/serverData.json
+data/userData.json
