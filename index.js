@@ -83,18 +83,18 @@ function spawnEntity(channel, guildId) {
 
     const embed = new EmbedBuilder()
         .setTitle('¡Ha aparecido una entidad!')
-        .setDescription(`Esta entidad solo dará un regalo al que **${action} la Navidad**. ¿Qué eliges?`)
+        .setDescription(`Esta entidad solo dará un regalo al que **${action} San Valentin**. ¿Qué eliges?`)
         .setImage(image)
         .setColor('#FF0000');
 
     const adoreButton = new ButtonBuilder()
         .setCustomId('adora')
-        .setLabel('Adoro Navidad')
+        .setLabel('Adoro San Valentin')
         .setStyle(ButtonStyle.Success);
 
     const detestButton = new ButtonBuilder()
         .setCustomId('detesta')
-        .setLabel('Detesto Navidad')
+        .setLabel('Detesto San Valentin')
         .setStyle(ButtonStyle.Danger);
 
     const row = new ActionRowBuilder().addComponents(adoreButton, detestButton);
@@ -164,7 +164,7 @@ client.on('interactionCreate', async (interaction) => {
     const failImage = failImageArray[Math.floor(Math.random() * failImageArray.length)];
 
     const failEmbed = EmbedBuilder.from(message.embeds[0])
-      .setDescription('La entidad se asustó y se fue al ver que nadie tenía el espíritu navideño adecuado.')
+      .setDescription('La entidad se asustó y se fue al ver que nadie tenía el espíritu de san valentin adecuado.')
       .setImage(failImage || '');
 
     message.edit({ embeds: [failEmbed], components: [] });
